@@ -5,7 +5,7 @@ type Props = {
   onRemove: () => void;
 };
 
-export function User({ name, onRemove }: Props) {
+export function Participant({ name, onRemove }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.name}>{name}</Text>

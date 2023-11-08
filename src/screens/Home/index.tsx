@@ -1,34 +1,50 @@
+import { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
+  Alert,
+  FlatList,
+  Pressable,
 } from "react-native";
-import { User } from "../../components/User";
+import { Participant } from "../../components/Participants";
 
 export default function Home() {
-  const users = [
-    "Thales",
-    "Rodrigo",
-    "Isa",
-    "Mayk",
-    "João",
-    "Lucas",
-    "Judas",
-    "Neymar",
-    "Cbum",
-    "Dino",
-    "Lala",
-  ];
+  const [participants, setParticipants] = useState<string[]>([]);
+  const [participantName, setParticipantName] = useState("");
 
   function handleParticipantAdd() {
-    console.log("clicou");
+    if (participantName === " " || participantName === "") {
+      Alert.alert("Participante Vazio", "Digite um nome válido");
+      return;
+    } else if (participants.includes(participantName)) {
+      Alert.alert(
+        "Participante Existe",
+        "Já existe um participante na lista com esse nome"
+      );
+      return;
+    }
+
+    setParticipants((prevState) => [...prevState, participantName]);
+    setParticipantName("");
   }
 
   function handleParticipantRemove(name: string) {
-    console.log(`Voce clicou em remover o participante ${name}`);
+    Alert.alert("Remover", `Remover o participante ${name} ?`, [
+      {
+        text: "Sim",
+        onPress: () =>
+          setParticipants((prevState) =>
+            prevState.filter((participant) => participant !== name)
+          ),
+      },
+      {
+        text: "Não",
+        style: "cancel",
+      },
+    ]);
   }
 
   return (
@@ -40,22 +56,32 @@ export default function Home() {
           style={styles.input}
           placeholder="Nome do participante"
           placeholderTextColor="#6B6B6B"
+          onChangeText={(text) => setParticipantName(text)}
+          value={participantName}
         />
-        <TouchableOpacity style={styles.button}>
+        <Pressable style={styles.button}>
           <Text style={styles.buttonText} onPress={handleParticipantAdd}>
             +
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {users.map((user) => (
-          <User
-            key={user}
-            name={user}
-            onRemove={() => handleParticipantRemove(user)}
+      <FlatList
+        data={participants}
+        keyExtractor={(item) => item}
+        renderItem={({ item }) => (
+          <Participant
+            key={item}
+            name={item}
+            onRemove={() => handleParticipantRemove(item)}
           />
-        ))}
-      </ScrollView>
+        )}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={() => (
+          <Text style={styles.listEmptyText}>
+            Ninguém chegou no evento ainda?
+          </Text>
+        )}
+      />
     </View>
   );
 }
@@ -104,5 +130,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 36,
     marginBottom: 42,
+  },
+  listEmptyText: {
+    color: "#fff",
+    fontSize: 24,
   },
 });
